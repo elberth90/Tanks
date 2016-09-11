@@ -13,11 +13,14 @@ public class TankShooting : MonoBehaviour
     public float m_MinLaunchForce = 15f; 
     public float m_MaxLaunchForce = 30f; 
     public float m_MaxChargeTime = 0.75f;
+	public float firePushPower = 100f;
+	public float reloadTime = 1f;
 
     private string m_FireButton;         
     private float m_CurrentLaunchForce;  
     private float m_ChargeSpeed;         
-    private bool m_Fired;                
+    private bool m_Fired;
+	private float lastShot;
 
 
     private void OnEnable()
@@ -36,6 +39,10 @@ public class TankShooting : MonoBehaviour
 
     private void Update()
     {
+		if (!this.CanShoot ()) {
+			return;
+		}
+
 		this.m_AimSlider.value = this.m_MinLaunchForce;
 
 		if (this.m_CurrentLaunchForce >= this.m_MaxLaunchForce && !this.m_Fired && Input.GetButtonUp (this.m_FireButton)) {
@@ -56,6 +63,13 @@ public class TankShooting : MonoBehaviour
 
     }
 
+	private bool CanShoot()
+	{
+		if (this.lastShot == null)
+			return true;
+		return (Time.time - this.reloadTime > this.lastShot);
+	}
+
 
     private void Fire()
     {
@@ -65,5 +79,7 @@ public class TankShooting : MonoBehaviour
 		this.m_ShootingAudio.clip = this.m_FireClip;
 		this.m_ShootingAudio.Play ();
 		this.m_CurrentLaunchForce = this.m_MinLaunchForce;
-    }
+		this.lastShot = Time.time;
+		Rigidbody tankRigidbody = this.gameObject.GetComponent<Rigidbody>();
+	}
 }
